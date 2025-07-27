@@ -44,3 +44,14 @@ st.sidebar.number_input(
     label_visibility="visible",
     width="stretch"
 )
+
+st.sidebar.number_input(
+    label="Risk free interest rate",
+    min_value=0.0,
+    value="min",
+    step=0.01,
+    label_visibility="visible",
+    width="stretch"
+)
+
+st.title("Black Scholes Option Pricer")
