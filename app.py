@@ -60,7 +60,7 @@ risk_free_interest_rate_input = st.sidebar.number_input(
 st.title("Black Scholes Option Pricer")
 
 class BlackScholesEnvironment:
-    __days_per_year = 365
+    __days_per_year: int = 365
 
     def __init__(self, spot_price: float, strike_price: float, days_to_maturity: float, volatility: float, risk_free_interest_rate: float):
         self.spot_price = spot_price
@@ -76,33 +76,52 @@ class BlackScholesEnvironment:
         self.d2 = self.d1 - (volatility * math.sqrt(self.years_to_maturity))
         self.d1_cdf = norm.cdf(self.d1)
         self.d2_cdf = norm.cdf(self.d2)
-        self.exponential_component = math.exp(-risk_free_interest_rate * self.years_to_maturity)
+        self.d1_pdf = norm.pdf(self.d1)
+        self.d2_pdf = norm.pdf(self.d2)
+        self.continuous_discounting_factor = math.exp(-risk_free_interest_rate * self.years_to_maturity)
+
+        self.gamma = self.d1_pdf / (self.spot_price * self.volatility * math.sqrt(self.years_to_maturity))
 
 class Option(ABC):
+    env: BlackScholesEnvironment
+    price: float
+    delta: float
+    gamma: float
+
     def __init__(self, env: BlackScholesEnvironment):
         self.env = env
+        self.price = self.price()
+        self.delta = self.delta()
+        self.gamma = env.gamma
+        self.rho = self.rho()
 
     @abstractmethod
-    def price(self):
+    def price(self) -> float:
         pass
 
     @abstractmethod
-    def delta(self):
+    def delta(self) -> float:
         pass
 
 class Call(Option):
     def price(self) -> float:
-        return self.env.spot_price * self.env.d1_cdf - self.env.strike_price * self.env.exponential_component * self.env.d2_cdf
+        return self.env.spot_price * self.env.d1_cdf - self.env.strike_price * self.env.continuous_discounting_factor * self.env.d2_cdf
 
     def delta(self) -> float:
-        return self.env.exponential_component * self.env.d1_cdf
+        return self.env.d1_cdf
+
+    def rho(self) -> float:
+        return self.env.strike_price * self.env.years_to_maturity * self.env.continuous_discounting_factor * self.env.d2_cdf
 
 class Put(Option):
     def price(self) -> float:
-        return self.env.strike_price * self.env.exponential_component * (1 - self.env.d2_cdf) - self.env.spot_price * (1 - self.env.d1_cdf)
+        return self.env.strike_price * self.env.continuous_discounting_factor * (1 - self.env.d2_cdf) - self.env.spot_price * (1 - self.env.d1_cdf)
 
     def delta(self) -> float:
-        return self.env.exponential_component * (self.env.d1_cdf - 1)
+        return self.env.d1_cdf - 1
+
+    def rho(self) -> float:
+        return self.env.strike_price * self.env.years_to_maturity * self.env.continuous_discounting_factor * (self.env.d2_cdf - 1)
 
 environment = BlackScholesEnvironment(spot_price_input, strike_price_input, days_to_maturity_input, volatility_input, risk_free_interest_rate_input)
 call = Call(environment)
@@ -110,10 +129,12 @@ put = Put(environment)
 
 call_column, put_column = st.columns(2)
 
-call_column.metric("CALL", f"€{call.price():.2f}", border=True)
-call_column.badge("Δ = " + f"{call.delta():.3f}", color="blue")
-call_column.badge("Γ = " + f"", color="green")
+call_column.metric("CALL", f"€ {call.price:.2f}", border=True)
+call_column.badge("Δ = " + f"{call.delta:.3f}", color="blue")
+call_column.badge("Γ = " + f"{call.gamma:.3e}", color="green")
+call_column.badge("ρ = " + f"{call.rho:.3f}", color="orange")
 
-put_column.metric("PUT", f"€{put.price():.2f}", border=True)
-put_column.badge("Δ = " + f"{put.delta():.3f}", color="blue")
-put_column.badge("Γ = " + f"", color="green")
+put_column.metric("PUT", f"€ {put.price:.2f}", border=True)
+put_column.badge("Δ = " + f"{put.delta:.3f}", color="blue")
+put_column.badge("Γ = " + f"{put.gamma:.3e}", color="green")
+put_column.badge("ρ = " + f"{put.rho:.3f}", color="orange")
