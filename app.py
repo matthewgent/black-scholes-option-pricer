@@ -1,6 +1,7 @@
 import math
 from scipy.stats import norm
 import streamlit as st
+from abc import ABC, abstractmethod
 
 st.set_page_config(page_title="Black Scholes Option Pricer", page_icon=":chart_increasing:", layout="wide")
 
@@ -15,7 +16,7 @@ spot_price_input = st.sidebar.number_input(
     value="min",
     step=0.01,
     label_visibility="visible",
-    icon=":material/attach_money:",
+    icon=":material/euro:",
     width="stretch"
 )
 
@@ -25,7 +26,7 @@ strike_price_input = st.sidebar.number_input(
     value="min",
     step=0.01,
     label_visibility="visible",
-    icon=":material/attach_money:",
+    icon=":material/euro:",
     width="stretch"
 )
 
@@ -58,29 +59,61 @@ risk_free_interest_rate_input = st.sidebar.number_input(
 
 st.title("Black Scholes Option Pricer")
 
-def black_scholes_prices(spot_price: float, strike_price: float, days_to_maturity: float, volatility: float, risk_free_interest_rate: float) -> tuple[float, float]:
-    years_to_maturity = days_to_maturity / 365
+class BlackScholesEnvironment:
+    __days_per_year = 365
 
-    d1_numerator = math.log(spot_price / strike_price) + (risk_free_interest_rate + 0.5 * volatility**2) * years_to_maturity
-    d1_denominator = volatility * math.sqrt(years_to_maturity)
-    d1 = d1_numerator / d1_denominator
+    def __init__(self, spot_price: float, strike_price: float, days_to_maturity: float, volatility: float, risk_free_interest_rate: float):
+        self.spot_price = spot_price
+        self.strike_price = strike_price
+        self.days_to_maturity = days_to_maturity
+        self.volatility = volatility
+        self.risk_free_interest_rate = risk_free_interest_rate
 
-    d2 = d1 - (volatility * math.sqrt(years_to_maturity))
+        self.years_to_maturity = days_to_maturity / self.__days_per_year
+        d1_numerator = math.log(spot_price / strike_price) + (risk_free_interest_rate + 0.5 * volatility ** 2) * self.years_to_maturity
+        d1_denominator = volatility * math.sqrt(self.years_to_maturity)
+        self.d1 = d1_numerator / d1_denominator
+        self.d2 = self.d1 - (volatility * math.sqrt(self.years_to_maturity))
+        self.d1_cdf = norm.cdf(self.d1)
+        self.d2_cdf = norm.cdf(self.d2)
+        self.exponential_component = math.exp(-risk_free_interest_rate * self.years_to_maturity)
 
-    d1_cdf = norm.cdf(d1)
-    d2_cdf = norm.cdf(d2)
-    exponential_component = math.exp(-risk_free_interest_rate * years_to_maturity)
-    call = spot_price * d1_cdf - strike_price * exponential_component * d2_cdf
-    put = strike_price * exponential_component * (1 - d2_cdf) - spot_price * (1 - d1_cdf)
+class Option(ABC):
+    def __init__(self, env: BlackScholesEnvironment):
+        self.env = env
 
-    return call, put
+    @abstractmethod
+    def price(self):
+        pass
 
-call_price, put_price = black_scholes_prices(spot_price_input, strike_price_input, days_to_maturity_input, volatility_input, risk_free_interest_rate_input)
+    @abstractmethod
+    def delta(self):
+        pass
+
+class Call(Option):
+    def price(self) -> float:
+        return self.env.spot_price * self.env.d1_cdf - self.env.strike_price * self.env.exponential_component * self.env.d2_cdf
+
+    def delta(self) -> float:
+        return self.env.exponential_component * self.env.d1_cdf
+
+class Put(Option):
+    def price(self) -> float:
+        return self.env.strike_price * self.env.exponential_component * (1 - self.env.d2_cdf) - self.env.spot_price * (1 - self.env.d1_cdf)
+
+    def delta(self) -> float:
+        return self.env.exponential_component * (self.env.d1_cdf - 1)
+
+environment = BlackScholesEnvironment(spot_price_input, strike_price_input, days_to_maturity_input, volatility_input, risk_free_interest_rate_input)
+call = Call(environment)
+put = Put(environment)
 
 call_column, put_column = st.columns(2)
-call_column.metric("CALL", f"${call_price:.2f}", border=True)
-put_column.metric("PUT", f"${put_price:.2f}", border=True)
 
+call_column.metric("CALL", f"€{call.price():.2f}", border=True)
+call_column.badge("Δ = " + f"{call.delta():.3f}", color="blue")
+call_column.badge("Γ = " + f"", color="green")
 
-
-st.badge()
+put_column.metric("PUT", f"€{put.price():.2f}", border=True)
+put_column.badge("Δ = " + f"{put.delta():.3f}", color="blue")
+put_column.badge("Γ = " + f"", color="green")
