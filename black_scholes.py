@@ -7,7 +7,7 @@ class Option(ABC):
     def __init__(
             self, spot_price: float, strike_price: float,
             years_to_maturity: float, volatility: float, d1_cdf: float,
-            d2_cdf: float, d1_pdf: float,
+            d2_cdf: float, d1_pdf: float, risk_free_interest_rate: float,
             continuous_discounting_factor: float):
         self.spot_price = spot_price
         self.strike_price = strike_price
@@ -16,6 +16,7 @@ class Option(ABC):
         self.d1_cdf = d1_cdf
         self.d2_cdf = d2_cdf
         self.d1_pdf = d1_pdf
+        self.risk_free_interest_rate = risk_free_interest_rate
         self.continuous_discounting_factor = continuous_discounting_factor
 
     @abstractmethod
@@ -24,6 +25,10 @@ class Option(ABC):
 
     @abstractmethod
     def delta(self) -> float:
+        pass
+
+    @abstractmethod
+    def theta(self) -> float:
         pass
 
     @abstractmethod
@@ -54,6 +59,15 @@ class Call(Option):
     def delta(self) -> float:
         return self.d1_cdf
 
+    def theta(self) -> float:
+        numerator = self.spot_price * self.d1_pdf * self.volatility
+        denominator = 2 * self.years_to_maturity
+        final_component = (self.risk_free_interest_rate
+                           * self.strike_price
+                           * self.continuous_discounting_factor
+                           * self.d2_cdf)
+        return -(numerator / denominator) - final_component
+
     def rho(self) -> float:
         return (self.strike_price
                 * self.years_to_maturity
@@ -68,6 +82,15 @@ class Put(Option):
 
     def delta(self) -> float:
         return self.d1_cdf - 1
+
+    def theta(self) -> float:
+        numerator = self.spot_price * self.d1_pdf * self.volatility
+        denominator = 2 * self.years_to_maturity
+        final_component = (self.risk_free_interest_rate
+                           * self.strike_price
+                           * self.continuous_discounting_factor
+                           * (self.d2_cdf - 1))
+        return -(numerator / denominator) + final_component
 
     def rho(self) -> float:
         return (self.strike_price
@@ -103,8 +126,10 @@ class PricingModel:
 
         self.call = Call(
             spot_price, strike_price, years_to_maturity, volatility, d1_cdf,
-            d2_cdf, d1_pdf, continuous_discounting_factor)
+            d2_cdf, d1_pdf, risk_free_interest_rate,
+            continuous_discounting_factor)
 
         self.put = Put(
             spot_price, strike_price, years_to_maturity, volatility, d1_cdf,
-            d2_cdf, d1_pdf, continuous_discounting_factor)
+            d2_cdf, d1_pdf, risk_free_interest_rate,
+            continuous_discounting_factor)
