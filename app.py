@@ -89,7 +89,7 @@ call_theta.badge("θ = " + f"{model.call.theta():.3}", color="red")
 call_rho.badge("ρ = " + f"{model.call.rho():.3}", color="violet")
 
 
-put.metric("CALL", f"€ {model.put.price():.2f}")
+put.metric("PUT", f"€ {model.put.price():.2f}")
 put_delta, put_gamma, put_vega, put_theta, put_rho = put.columns(5)
 put_delta.badge(
     "Δ = " + f"{model.put.delta():.3}",
