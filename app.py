@@ -69,17 +69,20 @@ model = PricingModel(
     spot_price_input, strike_price_input, days_to_maturity_input,
     volatility_input, risk_free_interest_rate_input)
 
-# These greeks are identical in call and put so should only be calculated once
+# Calculate constant greeks only once
 gamma = model.call.gamma()
+vega = model.call.vega()
 
 call_column, put_column = st.columns(2)
 
 call_column.metric("CALL", f"€ {model.call.price():.2f}", border=True)
 call_column.badge("Δ = " + f"{model.call.delta():.3f}", color="blue")
 call_column.badge("Γ = " + f"{gamma:.3e}", color="green")
-call_column.badge("ρ = " + f"{model.call.rho():.3f}", color="orange")
+call_column.badge("ν = " + f"{vega:.2f}", color="orange")
+call_column.badge("ρ = " + f"{model.call.rho():.3f}", color="violet")
 
 put_column.metric("PUT", f"€ {model.put.price():.2f}", border=True)
 put_column.badge("Δ = " + f"{model.put.delta():.3f}", color="blue")
 put_column.badge("Γ = " + f"{gamma:.3e}", color="green")
-put_column.badge("ρ = " + f"{model.put.rho():.3f}", color="orange")
+put_column.badge("ν = " + f"{vega:.2f}", color="orange")
+put_column.badge("ρ = " + f"{model.put.rho():.3f}", color="violet")

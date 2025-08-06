@@ -37,6 +37,11 @@ class Option(ABC):
                        * math.sqrt(self.years_to_maturity))
         return self.d1_pdf / denominator
 
+    def vega(self) -> float:
+        return (self.spot_price
+                * self.d1_pdf
+                * math.sqrt(self.years_to_maturity))
+
 
 class Call(Option):
     def price(self) -> float:
