@@ -28,7 +28,7 @@ spot_price_input = st.sidebar.number_input(
 strike_price_input = st.sidebar.number_input(
     label="Strike price",
     min_value=0.01,
-    value=90.0,
+    value=95.0,
     step=0.01,
     label_visibility="visible",
     icon=":material/euro:",
@@ -67,7 +67,7 @@ st.title("Black Scholes Option Pricer")
 
 model = PricingModel(
     spot_price_input, strike_price_input, days_to_maturity_input,
-    volatility_input, risk_free_interest_rate_input)
+    volatility_input, risk_free_interest_rate_input / 100)
 
 # Calculate constant greeks only once
 gamma = model.call.gamma()
