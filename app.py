@@ -73,18 +73,32 @@ model = PricingModel(
 gamma = model.call.gamma()
 vega = model.call.vega()
 
-call_column, put_column = st.columns(2)
+call, put = st.columns(2, border=True)
+call.metric("CALL", f"€ {model.call.price():.2f}")
+call_delta, call_gamma, call_vega, call_theta, call_rho = call.columns(5)
+call_delta.badge(
+    "Δ = " + f"{model.call.delta():.3f}",
+    color="blue",
+    )
+call_gamma.badge(
+    "Γ = " + f"{gamma:.3e}",
+    color="green",
+    width="stretch")
+call_vega.badge("ν = " + f"{vega:.3f}", color="orange")
+call_theta.badge("θ = " + f"{model.call.theta():.3f}", color="red")
+call_rho.badge("ρ = " + f"{model.call.rho():.3f}", color="violet")
 
-call_column.metric("CALL", f"€ {model.call.price():.2f}", border=True)
-call_column.badge("Δ = " + f"{model.call.delta():.3f}", color="blue")
-call_column.badge("Γ = " + f"{gamma:.3e}", color="green")
-call_column.badge("ν = " + f"{vega:.3f}", color="orange")
-call_column.badge("θ = " + f"{model.call.theta():.3f}", color="red")
-call_column.badge("ρ = " + f"{model.call.rho():.3f}", color="violet")
 
-put_column.metric("PUT", f"€ {model.put.price():.2f}", border=True)
-put_column.badge("Δ = " + f"{model.put.delta():.3f}", color="blue")
-put_column.badge("Γ = " + f"{gamma:.3e}", color="green")
-put_column.badge("ν = " + f"{vega:.3f}", color="orange")
-put_column.badge("θ = " + f"{model.put.theta():.3f}", color="red")
-put_column.badge("ρ = " + f"{model.put.rho():.3f}", color="violet")
+put.metric("CALL", f"€ {model.call.price():.2f}")
+put_delta, put_gamma, put_vega, put_theta, put_rho = put.columns(5)
+put_delta.badge(
+    "Δ = " + f"{model.call.delta():.3f}",
+    color="blue",
+    )
+put_gamma.badge(
+    "Γ = " + f"{gamma:.3e}",
+    color="green",
+    width="stretch")
+put_vega.badge("ν = " + f"{vega:.3f}", color="orange")
+put_theta.badge("θ = " + f"{model.call.theta():.3f}", color="red")
+put_rho.badge("ρ = " + f"{model.call.rho():.3f}", color="violet")
