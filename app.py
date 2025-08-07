@@ -65,40 +65,34 @@ risk_free_interest_rate_input = st.sidebar.number_input(
 # Main page
 st.title("Black Scholes Option Pricer")
 
-model = PricingModel(
+
+def badge(color: str, symbol: str, value: str) -> str:
+    styles = [
+        f"background-color:{color}",
+        "width:100%",
+        "text-align:center",
+        "border-radius:4px",
+        "font-size:smaller",
+        "padding:2px",
+        "line-height:1.4em"
+    ]
+    return f"<div style='{";".join(styles)}'>{symbol}<br>{value}</div>"
+
+
+def greeks(column, heading: str, pricing_model: PricingModel) -> None:
+    column.metric(heading, f"€ {pricing_model.price():.2f}")
+    col1, col2, col3, col4, col5 = column.columns(5)
+    col1.html(badge("chocolate", "Δ", f"{pricing_model.delta():.3}"))
+    col2.html(badge("darkgreen", "Γ", f"{pricing_model.gamma():.3}"))
+    col3.html(badge("darkorchid", "ν", f"{pricing_model.vega():.3}"))
+    col4.html(badge("firebrick", "θ", f"{pricing_model.theta():.3}"))
+    col5.html(badge("steelblue", "ρ", f"{pricing_model.rho():.3}"))
+
+
+pricing_model = PricingModel(
     spot_price_input, strike_price_input, days_to_maturity_input,
     volatility_input, risk_free_interest_rate_input / 100)
 
-# Calculate constant greeks only once
-gamma = model.call.gamma()
-vega = model.call.vega()
-
 call, put = st.columns(2, border=True)
-call.metric("CALL", f"€ {model.call.price():.2f}")
-call_delta, call_gamma, call_vega, call_theta, call_rho = call.columns(5)
-call_delta.badge(
-    "Δ = " + f"{model.call.delta():.3}",
-    color="blue",
-    )
-call_gamma.badge(
-    "Γ = " + f"{gamma:.3e}",
-    color="green",
-    width="stretch")
-call_vega.badge("ν = " + f"{vega:.3}", color="orange")
-call_theta.badge("θ = " + f"{model.call.theta():.3}", color="red")
-call_rho.badge("ρ = " + f"{model.call.rho():.3}", color="violet")
-
-
-put.metric("PUT", f"€ {model.put.price():.2f}")
-put_delta, put_gamma, put_vega, put_theta, put_rho = put.columns(5)
-put_delta.badge(
-    "Δ = " + f"{model.put.delta():.3}",
-    color="blue",
-    )
-put_gamma.badge(
-    "Γ = " + f"{gamma:.3e}",
-    color="green",
-    width="stretch")
-put_vega.badge("ν = " + f"{vega:.3f}", color="orange")
-put_theta.badge("θ = " + f"{model.put.theta():.3}", color="red")
-put_rho.badge("ρ = " + f"{model.put.rho():.3}", color="violet")
+greeks(call, "CALL", pricing_model.call)
+greeks(put, "PUT", pricing_model.put)
