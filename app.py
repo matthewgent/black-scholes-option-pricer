@@ -63,7 +63,7 @@ risk_free_interest_rate_input = st.sidebar.number_input(
 )
 
 # Main page
-st.title("Black Scholes Option Pricer")
+st.subheader("Prices and Greeks")
 
 
 def badge(color: str, symbol: str, value: str) -> str:
@@ -79,14 +79,14 @@ def badge(color: str, symbol: str, value: str) -> str:
     return f"<div style='{";".join(styles)}'>{symbol}<br>{value}</div>"
 
 
-def greeks(column, heading: str, pricing_model: PricingModel) -> None:
-    column.metric(heading, f"€ {pricing_model.price():.2f}")
+def greeks(column, heading: str, model: PricingModel) -> None:
+    column.metric(heading, f"€ {model.price():.2f}")
     col1, col2, col3, col4, col5 = column.columns(5)
-    col1.html(badge("chocolate", "Δ", f"{pricing_model.delta():.3}"))
-    col2.html(badge("darkgreen", "Γ", f"{pricing_model.gamma():.3}"))
-    col3.html(badge("darkorchid", "ν", f"{pricing_model.vega():.3}"))
-    col4.html(badge("firebrick", "θ", f"{pricing_model.theta():.3}"))
-    col5.html(badge("steelblue", "ρ", f"{pricing_model.rho():.3}"))
+    col1.html(badge("chocolate", "Δ", f"{model.delta():.3}"))
+    col2.html(badge("darkgreen", "Γ", f"{model.gamma():.3}"))
+    col3.html(badge("darkorchid", "ν", f"{model.vega():.3}"))
+    col4.html(badge("firebrick", "θ", f"{model.theta():.3}"))
+    col5.html(badge("steelblue", "ρ", f"{model.rho():.3}"))
 
 
 pricing_model = PricingModel(
@@ -96,3 +96,33 @@ pricing_model = PricingModel(
 call, put = st.columns(2, border=True)
 greeks(call, "CALL", pricing_model.call)
 greeks(put, "PUT", pricing_model.put)
+
+st.divider()
+
+with st.container():
+    st.subheader("Heat Maps")
+    col1, col2, col3 = st.columns([1, 1, 2], gap="medium")
+    col1.number_input(
+        label="Min spot price",
+        min_value=0.01,
+        value=spot_price_input * 0.9,
+        step=0.01,
+        label_visibility="visible",
+        icon=":material/euro:",
+        width="stretch"
+    )
+    col2.number_input(
+        label="Max spot price",
+        min_value=0.01,
+        value=spot_price_input * 1.1,
+        step=0.01,
+        label_visibility="visible",
+        icon=":material/euro:",
+        width="stretch"
+    )
+    col3.slider(
+        "Volatility range",
+        0.0,
+        1.0,
+        (volatility_input - 0.2, volatility_input + 0.2)
+    )
