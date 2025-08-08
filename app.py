@@ -1,5 +1,6 @@
 import streamlit as st
 from black_scholes import PricingModel
+import plotly.express as plotly
 
 st.set_page_config(
     page_title="Black Scholes Option Pricer",
@@ -121,3 +122,16 @@ with st.container():
         1.0,
         (volatility_input - 0.2, volatility_input + 0.2)
     )
+
+st.html('<br>')
+
+map1, map2 = st.columns(2, border=True)
+
+chart_data = [[.1, .3, .5, .7, .9],
+              [1, .8, .6, .4, .2],
+              [.2, 0, .5, .7, .9],
+              [.9, .8, .4, .2, 0],
+              [.3, .4, .5, .7, 1]]
+
+figure = plotly.imshow(chart_data, text_auto=True)
+map1.plotly_chart(figure)
