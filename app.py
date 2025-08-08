@@ -6,7 +6,6 @@ st.set_page_config(
     page_icon=":chart_increasing:",
     layout="wide")
 
-# Sidebar
 st.sidebar.caption("Linkedin profile:")
 st.sidebar.page_link(
     "https://linkedin.com/in/matthewgent",
@@ -62,16 +61,13 @@ risk_free_interest_rate_input = st.sidebar.number_input(
     width="stretch"
 )
 
-# Main page
-st.subheader("Prices and Greeks")
-
 
 def badge(color: str, symbol: str, value: str) -> str:
     styles = [
         f"background-color:{color}",
         "width:100%",
         "text-align:center",
-        "border-radius:4px",
+        "border-radius:2em",
         "font-size:smaller",
         "padding:2px",
         "line-height:1.4em"
@@ -97,10 +93,9 @@ call, put = st.columns(2, border=True)
 greeks(call, "CALL", pricing_model.call)
 greeks(put, "PUT", pricing_model.put)
 
-st.divider()
+st.html('<br>')
 
 with st.container():
-    st.subheader("Heat Maps")
     col1, col2, col3 = st.columns([1, 1, 2], gap="medium")
     col1.number_input(
         label="Min spot price",
