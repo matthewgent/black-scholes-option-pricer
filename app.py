@@ -2,6 +2,7 @@ import streamlit as st
 from black_scholes import PricingModel
 import plotly.express as plotly
 import numpy
+from scipy.stats.contingency import margins
 
 st.set_page_config(
     page_title="Black Scholes Option Pricer",
@@ -102,7 +103,7 @@ with st.container(border=True):
     min_spot_price = col1.number_input(
         label="Min spot price",
         min_value=0.01,
-        value=spot_price_input * 0.9,
+        value=90.0,
         step=0.01,
         label_visibility="visible",
         icon=":material/euro:",
@@ -111,7 +112,7 @@ with st.container(border=True):
     max_spot_price = col2.number_input(
         label="Max spot price",
         min_value=0.01,
-        value=spot_price_input * 1.1,
+        value=110.0,
         step=0.01,
         label_visibility="visible",
         icon=":material/euro:",
@@ -121,12 +122,12 @@ with st.container(border=True):
         "Volatility range",
         0.0,
         1.0,
-        (max(volatility_input - 0.2, 0.0), min(volatility_input + 0.2, 1.0))
+        (0.3, 0.7)
     )
 
     call_map, put_map = st.columns(2)
 
-    chart_size = 10
+    chart_size = 11
     x_prices = numpy.linspace(min_spot_price, max_spot_price, chart_size)
     y_volatilities = numpy.linspace(min_volatility, max_volatility, chart_size)
 
@@ -140,8 +141,8 @@ with st.container(border=True):
                 x_price, strike_price_input, days_to_maturity_input,
                 y_volatility, risk_free_interest_rate_input / 100
             )
-            call_x_data.append(f"{pricing_model.call.price():.3}")
-            put_x_data.append(f"{pricing_model.put.price():.3}")
+            call_x_data.append(f"{pricing_model.call.price():.2f}")
+            put_x_data.append(f"{pricing_model.put.price():.2f}")
         call_data.append(call_x_data)
         put_data.append(put_x_data)
 
@@ -150,6 +151,22 @@ with st.container(border=True):
         text_auto=True,
         title="CALL",
         labels=dict(x="Spot Price (€)", y="Volatility"),
+        aspect="equal",
+    )
+    call_figure.update_layout(
+        margin=dict(l=50, r=50, t=50, b=70),
+    )
+    call_figure.update_coloraxes(showscale=False)
+    call_figure.update_xaxes(
+        tickangle=90,
+        tickmode="array",
+        tickvals=list(range(11)),
+        ticktext=[f"{price:.2f}" for price in x_prices]
+    )
+    call_figure.update_yaxes(
+        tickmode="array",
+        tickvals=list(range(11)),
+        ticktext=[f"{volatility:.2g}" for volatility in y_volatilities]
     )
     call_map.plotly_chart(call_figure, theme=None)
 
@@ -158,6 +175,22 @@ with st.container(border=True):
         text_auto=True,
         title="PUT",
         labels=dict(x="Spot Price (€)", y="Volatility"),
+        aspect="equal",
+    )
+    put_figure.update_layout(
+        margin=dict(l=50, r=50, t=50, b=70),
+    )
+    put_figure.update_coloraxes(showscale=False)
+    put_figure.update_xaxes(
+        tickangle=90,
+        tickmode="array",
+        tickvals=list(range(11)),
+        ticktext=[f"{price:.2f}" for price in x_prices]
+    )
+    put_figure.update_yaxes(
+        tickmode="array",
+        tickvals=list(range(11)),
+        ticktext=[f"{volatility:.2g}" for volatility in y_volatilities]
     )
     put_map.plotly_chart(put_figure, theme=None)
 
