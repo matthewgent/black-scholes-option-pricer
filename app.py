@@ -1,6 +1,7 @@
 import streamlit as st
 from black_scholes import PricingModel
 import plotly.express as plotly
+import numpy
 
 st.set_page_config(
     page_title="Black Scholes Option Pricer",
@@ -96,9 +97,9 @@ greeks(put, "PUT", pricing_model.put)
 
 st.html('<br>')
 
-with st.container():
+with st.container(border=True):
     col1, col2, col3 = st.columns([1, 1, 2], gap="medium")
-    col1.number_input(
+    min_spot_price = col1.number_input(
         label="Min spot price",
         min_value=0.01,
         value=spot_price_input * 0.9,
@@ -107,7 +108,7 @@ with st.container():
         icon=":material/euro:",
         width="stretch"
     )
-    col2.number_input(
+    max_spot_price = col2.number_input(
         label="Max spot price",
         min_value=0.01,
         value=spot_price_input * 1.1,
@@ -116,22 +117,47 @@ with st.container():
         icon=":material/euro:",
         width="stretch"
     )
-    col3.slider(
+    min_volatility, max_volatility = col3.slider(
         "Volatility range",
         0.0,
         1.0,
-        (volatility_input - 0.2, volatility_input + 0.2)
+        (max(volatility_input - 0.2, 0.0), min(volatility_input + 0.2, 1.0))
     )
 
-st.html('<br>')
+    call_map, put_map = st.columns(2)
 
-map1, map2 = st.columns(2, border=True)
+    chart_size = 10
+    x_prices = numpy.linspace(min_spot_price, max_spot_price, chart_size)
+    y_volatilities = numpy.linspace(min_volatility, max_volatility, chart_size)
 
-chart_data = [[.1, .3, .5, .7, .9],
-              [1, .8, .6, .4, .2],
-              [.2, 0, .5, .7, .9],
-              [.9, .8, .4, .2, 0],
-              [.3, .4, .5, .7, 1]]
+    call_data = []
+    put_data = []
+    for x_price in x_prices:
+        call_x_data = []
+        put_x_data = []
+        for y_volatility in y_volatilities:
+            pricing_model = PricingModel(
+                x_price, strike_price_input, days_to_maturity_input,
+                y_volatility, risk_free_interest_rate_input / 100
+            )
+            call_x_data.append(f"{pricing_model.call.price():.3}")
+            put_x_data.append(f"{pricing_model.put.price():.3}")
+        call_data.append(call_x_data)
+        put_data.append(put_x_data)
 
-figure = plotly.imshow(chart_data, text_auto=True)
-map1.plotly_chart(figure)
+    call_figure = plotly.imshow(
+        call_data,
+        text_auto=True,
+        title="CALL",
+        labels=dict(x="Spot Price (€)", y="Volatility"),
+    )
+    call_map.plotly_chart(call_figure, theme=None)
+
+    put_figure = plotly.imshow(
+        put_data,
+        text_auto=True,
+        title="PUT",
+        labels=dict(x="Spot Price (€)", y="Volatility"),
+    )
+    put_map.plotly_chart(put_figure, theme=None)
+
