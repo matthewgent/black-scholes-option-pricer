@@ -1,8 +1,7 @@
 import streamlit as st
-from black_scholes import PricingModel
-import plotly.express as plotly
 import numpy
-from scipy.stats.contingency import margins
+import plotly.express as plotly
+from black_scholes import PricingModel, Option
 
 st.set_page_config(
     page_title="Black Scholes Option Pricer",
@@ -65,7 +64,7 @@ risk_free_interest_rate_input = st.sidebar.number_input(
 )
 
 
-def badge(color: str, symbol: str, value: str) -> str:
+def greek_badge(color: str, symbol: str, value: str) -> str:
     styles = [
         f"background-color:{color}",
         "width:100%",
@@ -75,17 +74,18 @@ def badge(color: str, symbol: str, value: str) -> str:
         "padding:2px",
         "line-height:1.4em"
     ]
-    return f"<div style='{";".join(styles)}'>{symbol}<br>{value}</div>"
+    styles_string = ";".join(styles)
+    return f"<div style='{styles_string}'>{symbol}<br>{value}</div>"
 
 
-def greeks(column, heading: str, model: PricingModel) -> None:
-    column.metric(heading, f"€ {model.price():.2f}")
-    col1, col2, col3, col4, col5 = column.columns(5)
-    col1.html(badge("chocolate", "Δ", f"{model.delta():.3}"))
-    col2.html(badge("darkgreen", "Γ", f"{model.gamma():.3}"))
-    col3.html(badge("darkorchid", "ν", f"{model.vega():.3}"))
-    col4.html(badge("firebrick", "θ", f"{model.theta():.3}"))
-    col5.html(badge("steelblue", "ρ", f"{model.rho():.3}"))
+def insert_greeks(st_column, heading: str, option: Option) -> None:
+    st_column.metric(heading, f"€ {option.price():.2f}")
+    col1, col2, col3, col4, col5 = st_column.columns(5)
+    col1.html(greek_badge("chocolate", "Δ", f"{option.delta():.3}"))
+    col2.html(greek_badge("darkgreen", "Γ", f"{option.gamma():.3}"))
+    col3.html(greek_badge("darkorchid", "ν", f"{option.vega():.3}"))
+    col4.html(greek_badge("firebrick", "θ", f"{option.theta():.3}"))
+    col5.html(greek_badge("steelblue", "ρ", f"{option.rho():.3}"))
 
 
 pricing_model = PricingModel(
@@ -93,8 +93,9 @@ pricing_model = PricingModel(
     volatility_input, risk_free_interest_rate_input / 100)
 
 call, put = st.columns(2, border=True)
-greeks(call, "CALL", pricing_model.call)
-greeks(put, "PUT", pricing_model.put)
+
+insert_greeks(call, "CALL", pricing_model.call)
+insert_greeks(put, "PUT", pricing_model.put)
 
 st.html('<br>')
 
@@ -125,7 +126,7 @@ with st.container(border=True):
         (0.3, 0.7)
     )
 
-    call_map, put_map = st.columns(2)
+    call_map_col, put_map_col = st.columns(2)
 
     chart_size = 11
     x_prices = numpy.linspace(min_spot_price, max_spot_price, chart_size)
@@ -146,51 +147,30 @@ with st.container(border=True):
         call_data.append(call_x_data)
         put_data.append(put_x_data)
 
-    call_figure = plotly.imshow(
-        call_data,
-        text_auto=True,
-        title="CALL",
-        labels=dict(x="Spot Price (€)", y="Volatility"),
-        aspect="equal",
-    )
-    call_figure.update_layout(
-        margin=dict(l=50, r=50, t=50, b=70),
-    )
-    call_figure.update_coloraxes(showscale=False)
-    call_figure.update_xaxes(
-        tickangle=90,
-        tickmode="array",
-        tickvals=list(range(11)),
-        ticktext=[f"{price:.2f}" for price in x_prices]
-    )
-    call_figure.update_yaxes(
-        tickmode="array",
-        tickvals=list(range(11)),
-        ticktext=[f"{volatility:.2g}" for volatility in y_volatilities]
-    )
-    call_map.plotly_chart(call_figure, theme=None)
+    def plot_heat_map(st_column, title: str, map_data: list) -> None:
+        heat_map = plotly.imshow(
+            map_data,
+            text_auto=True,
+            title=title,
+            labels=dict(x="Spot Price (€)", y="Volatility"),
+            aspect="equal",
+        )
+        heat_map.update_layout(
+            margin=dict(l=50, r=50, t=50, b=70),
+        )
+        heat_map.update_coloraxes(showscale=False)
+        heat_map.update_xaxes(
+            tickangle=90,
+            tickmode="array",
+            tickvals=list(range(11)),
+            ticktext=[f"{price:.2f}" for price in x_prices]
+        )
+        heat_map.update_yaxes(
+            tickmode="array",
+            tickvals=list(range(11)),
+            ticktext=[f"{volatility:.2g}" for volatility in y_volatilities]
+        )
+        st_column.plotly_chart(heat_map, theme=None)
 
-    put_figure = plotly.imshow(
-        put_data,
-        text_auto=True,
-        title="PUT",
-        labels=dict(x="Spot Price (€)", y="Volatility"),
-        aspect="equal",
-    )
-    put_figure.update_layout(
-        margin=dict(l=50, r=50, t=50, b=70),
-    )
-    put_figure.update_coloraxes(showscale=False)
-    put_figure.update_xaxes(
-        tickangle=90,
-        tickmode="array",
-        tickvals=list(range(11)),
-        ticktext=[f"{price:.2f}" for price in x_prices]
-    )
-    put_figure.update_yaxes(
-        tickmode="array",
-        tickvals=list(range(11)),
-        ticktext=[f"{volatility:.2g}" for volatility in y_volatilities]
-    )
-    put_map.plotly_chart(put_figure, theme=None)
-
+    plot_heat_map(call_map_col, "CALL", call_data)
+    plot_heat_map(put_map_col, "PUT", put_data)
