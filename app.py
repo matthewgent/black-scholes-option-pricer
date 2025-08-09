@@ -10,14 +10,14 @@ CURRENCY_ICON = ":material/euro:"
 st.set_page_config(
     page_title="Black Scholes Option Pricer",
     page_icon=":chart_increasing:",
-    layout="wide"
+    layout="wide",
 )
 
 st.sidebar.caption("Linkedin profile:")
 st.sidebar.page_link(
     "https://linkedin.com/in/matthewgent",
     label="Matthew Gent",
-    icon=":material/link:"
+    icon=":material/link:",
 )
 
 st.sidebar.divider()
@@ -85,7 +85,7 @@ pricing_model = PricingModel(
     strike_price_input,
     days_to_maturity_input,
     volatility_input,
-    risk_free_interest_rate_input / 100
+    risk_free_interest_rate_input / 100,
 )
 
 call, put = st.columns(2, border=True)
@@ -115,7 +115,7 @@ with st.container(border=True):
         "Volatility range",
         0.0,
         1.0,
-        (0.3, 0.7)
+        (0.3, 0.7),
     )
 
     call_map_col, put_map_col = st.columns(2)
