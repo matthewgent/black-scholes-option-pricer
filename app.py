@@ -1,7 +1,10 @@
-import streamlit as st
 import numpy
+import streamlit as st
 import plotly.express as plotly
 from black_scholes import PricingModel, Option
+import heat_map
+
+CHART_SIZE = 11
 
 st.set_page_config(
     page_title="Black Scholes Option Pricer",
@@ -128,49 +131,16 @@ with st.container(border=True):
 
     call_map_col, put_map_col = st.columns(2)
 
-    chart_size = 11
-    x_prices = numpy.linspace(min_spot_price, max_spot_price, chart_size)
-    y_volatilities = numpy.linspace(min_volatility, max_volatility, chart_size)
+    x_prices = numpy.linspace(min_spot_price, max_spot_price, CHART_SIZE)
+    y_volatilities = numpy.linspace(min_volatility, max_volatility, CHART_SIZE)
 
-    call_data = []
-    put_data = []
-    for x_price in x_prices:
-        call_x_data = []
-        put_x_data = []
-        for y_volatility in y_volatilities:
-            pricing_model = PricingModel(
-                x_price, strike_price_input, days_to_maturity_input,
-                y_volatility, risk_free_interest_rate_input / 100
-            )
-            call_x_data.append(f"{pricing_model.call.price():.2f}")
-            put_x_data.append(f"{pricing_model.put.price():.2f}")
-        call_data.append(call_x_data)
-        put_data.append(put_x_data)
+    call_data, put_data = heat_map.data(
+        x_prices,
+        y_volatilities,
+        strike_price_input,
+        days_to_maturity_input,
+        risk_free_interest_rate_input,
+    )
 
-    def plot_heat_map(st_column, title: str, map_data: list) -> None:
-        heat_map = plotly.imshow(
-            map_data,
-            text_auto=True,
-            title=title,
-            labels=dict(x="Spot Price (€)", y="Volatility"),
-            aspect="equal",
-        )
-        heat_map.update_layout(
-            margin=dict(l=50, r=50, t=50, b=70),
-        )
-        heat_map.update_coloraxes(showscale=False)
-        heat_map.update_xaxes(
-            tickangle=90,
-            tickmode="array",
-            tickvals=list(range(11)),
-            ticktext=[f"{price:.2f}" for price in x_prices]
-        )
-        heat_map.update_yaxes(
-            tickmode="array",
-            tickvals=list(range(11)),
-            ticktext=[f"{volatility:.2g}" for volatility in y_volatilities]
-        )
-        st_column.plotly_chart(heat_map, theme=None)
-
-    plot_heat_map(call_map_col, "CALL", call_data)
-    plot_heat_map(put_map_col, "PUT", put_data)
+    heat_map.plot(call_map_col, "CALL", call_data, x_prices, y_volatilities)
+    heat_map.plot(put_map_col, "PUT", put_data, x_prices, y_volatilities)
