@@ -10,13 +10,15 @@ CURRENCY_ICON = ":material/euro:"
 st.set_page_config(
     page_title="Black Scholes Option Pricer",
     page_icon=":chart_increasing:",
-    layout="wide")
+    layout="wide"
+)
 
 st.sidebar.caption("Linkedin profile:")
 st.sidebar.page_link(
     "https://linkedin.com/in/matthewgent",
     label="Matthew Gent",
-    icon=":material/link:")
+    icon=":material/link:"
+)
 
 st.sidebar.divider()
 
@@ -27,7 +29,6 @@ spot_price_input = st.sidebar.number_input(
     step=0.01,
     icon=CURRENCY_ICON,
 )
-
 strike_price_input = st.sidebar.number_input(
     label="Strike price",
     min_value=0.01,
@@ -35,21 +36,18 @@ strike_price_input = st.sidebar.number_input(
     step=0.01,
     icon=CURRENCY_ICON,
 )
-
 days_to_maturity_input = st.sidebar.number_input(
     label="Days to maturity",
     min_value=1,
     value=30,
     step=1,
 )
-
 volatility_input = st.sidebar.number_input(
     label="Volatility (σ)",
     min_value=0.01,
     value=0.5,
     step=0.01,
 )
-
 risk_free_interest_rate_input = st.sidebar.number_input(
     label="Risk free interest rate",
     min_value=0.0,
@@ -83,8 +81,12 @@ def insert_greeks(st_column, heading: str, option: Option) -> None:
 
 
 pricing_model = PricingModel(
-    spot_price_input, strike_price_input, days_to_maturity_input,
-    volatility_input, risk_free_interest_rate_input / 100)
+    spot_price_input,
+    strike_price_input,
+    days_to_maturity_input,
+    volatility_input,
+    risk_free_interest_rate_input / 100
+)
 
 call, put = st.columns(2, border=True)
 
