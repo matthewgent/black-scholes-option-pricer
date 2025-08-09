@@ -10,10 +10,10 @@ def data(
         risk_free_interest_rate_input: float) -> (list, list):
     call_data = []
     put_data = []
-    for x_price in x_prices:
+    for y_volatility in y_volatilities:
         call_x_data = []
         put_x_data = []
-        for y_volatility in y_volatilities:
+        for x_price in x_prices:
             pricing_model = PricingModel(
                 x_price, strike_price_input, days_to_maturity_input,
                 y_volatility, risk_free_interest_rate_input / 100
