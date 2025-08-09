@@ -6,19 +6,30 @@ import heat_map
 
 CHART_SIZE = 11
 CURRENCY_ICON = ":material/euro:"
+LINKEDIN_PROFILE_URL = "https://linkedin.com/in/matthewgent/"
+LINKEDIN_LOGO_URL = ("https://upload.wikimedia.org/wikipedia/commons/thumb/8"
+                     "/81/LinkedIn_icon.svg/144px-LinkedIn_icon.svg.png")
 
 st.set_page_config(
     page_title="Black Scholes Option Pricer",
-    page_icon=":chart_increasing:",
+    page_icon=":material/bar_chart:",
     layout="wide",
 )
 
-st.sidebar.caption("Linkedin profile:")
-st.sidebar.page_link(
-    "https://linkedin.com/in/matthewgent",
-    label="Matthew Gent",
-    icon=":material/link:",
-)
+st.sidebar.html(f"""
+    <a
+        style='display:flex;align-items:center;text-decoration:none;color:white;'
+        href='{LINKEDIN_PROFILE_URL}'
+        target='_blank'
+    >
+        <img
+            src='{LINKEDIN_LOGO_URL}'
+            style='width:30px;margin-right:1rem;'
+            alt='Linkedin logo'
+        >
+        <div>Matthew Gent</div>
+    </a>
+""")
 
 st.sidebar.divider()
 
@@ -57,17 +68,21 @@ risk_free_interest_rate_input = st.sidebar.number_input(
 
 
 def greek_badge(color: str, symbol: str, value: str) -> str:
-    styles = [
-        f"background-color:{color}",
-        "width:100%",
-        "text-align:center",
-        "border-radius:2em",
-        "font-size:smaller",
-        "padding:2px",
-        "line-height:1.4em"
-    ]
-    styles_string = ";".join(styles)
-    return f"<div style='{styles_string}'>{symbol}<br>{value}</div>"
+    return f"""
+        <div
+            style='
+                background-color:{color};
+                width:100%;
+                text-align:center;
+                border-radius:2em;
+                font-size:smaller;
+                padding:2px;
+                line-height:1.4em;
+            '
+        >
+            {symbol}<br>{value}
+        </div>
+    """
 
 
 def insert_greeks(st_column, heading: str, option: Option) -> None:
