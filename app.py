@@ -5,6 +5,7 @@ from black_scholes import PricingModel, Option
 import heat_map
 
 CHART_SIZE = 11
+CURRENCY_ICON = ":material/euro:"
 
 st.set_page_config(
     page_title="Black Scholes Option Pricer",
@@ -24,9 +25,7 @@ spot_price_input = st.sidebar.number_input(
     min_value=0.01,
     value=100.0,
     step=0.01,
-    label_visibility="visible",
-    icon=":material/euro:",
-    width="stretch"
+    icon=CURRENCY_ICON,
 )
 
 strike_price_input = st.sidebar.number_input(
@@ -34,9 +33,7 @@ strike_price_input = st.sidebar.number_input(
     min_value=0.01,
     value=95.0,
     step=0.01,
-    label_visibility="visible",
-    icon=":material/euro:",
-    width="stretch"
+    icon=CURRENCY_ICON,
 )
 
 days_to_maturity_input = st.sidebar.number_input(
@@ -44,8 +41,6 @@ days_to_maturity_input = st.sidebar.number_input(
     min_value=1,
     value=30,
     step=1,
-    label_visibility="visible",
-    width="stretch"
 )
 
 volatility_input = st.sidebar.number_input(
@@ -53,8 +48,6 @@ volatility_input = st.sidebar.number_input(
     min_value=0.01,
     value=0.5,
     step=0.01,
-    label_visibility="visible",
-    width="stretch"
 )
 
 risk_free_interest_rate_input = st.sidebar.number_input(
@@ -62,8 +55,6 @@ risk_free_interest_rate_input = st.sidebar.number_input(
     min_value=0.0,
     value=1.0,
     step=0.01,
-    label_visibility="visible",
-    width="stretch"
 )
 
 
@@ -109,18 +100,14 @@ with st.container(border=True):
         min_value=0.01,
         value=90.0,
         step=0.01,
-        label_visibility="visible",
-        icon=":material/euro:",
-        width="stretch"
+        icon=CURRENCY_ICON,
     )
     max_spot_price = col2.number_input(
         label="Max spot price",
         min_value=0.01,
         value=110.0,
         step=0.01,
-        label_visibility="visible",
-        icon=":material/euro:",
-        width="stretch"
+        icon=CURRENCY_ICON,
     )
     min_volatility, max_volatility = col3.slider(
         "Volatility range",
