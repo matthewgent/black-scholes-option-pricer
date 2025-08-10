@@ -5,7 +5,9 @@ the price, delta, gamma, vega, theta and rho values for both call and put option
 pricing model. It also provides a heat map for both options showing the sensitivity of option price to both
 spot price and volatility.
 
-Simply enter the price of the asset along with the option strike price, the number of days to maturity, the
+As a developer to launch the webapp run `python run.py`.
+
+To use the webapp simply enter the price of the asset along with the option strike price, the number of days to maturity, the
 volatility of the asset (σ) and the risk-free interest rate (usually the 10Y bond yield).
 
 This project was built as a practice for Python development and is not actively maintained.
