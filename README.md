@@ -1,2 +1,11 @@
 # Black Scholes Option Pricer
-A simple option calculator that uses the Black Scholes Merton mathematical model to determine prices.
+
+A single page web application that allows a user to input the five different option properties and determine
+the price, delta, gamma, vega, theta and rho values for both call and put options using the Black Scholes
+pricing model. It also provides a heat map for both options showing the sensitivity of option price to both
+spot price and volatility.
+
+Simply enter the price of the asset along with the option strike price, the number of days to maturity, the
+volatility of the asset (σ) and the risk-free interest rate (usually the 10Y bond yield).
+
+This project was built as a practice for Python development and is not actively maintained.
