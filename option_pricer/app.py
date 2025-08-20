@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import streamlit as st
 import plotly.express as plotly
 from black_scholes import PricingModel, Option
@@ -98,12 +98,12 @@ def build() -> None:
 
         call_map_col, put_map_col = st.columns(2)
 
-        x_prices = numpy.linspace(
+        x_prices = np.linspace(
             min_spot_price,
             max_spot_price,
             chart_size
         )
-        y_volatilities = numpy.linspace(
+        y_volatilities = np.linspace(
             min_volatility,
             max_volatility,
             chart_size
