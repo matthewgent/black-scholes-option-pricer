@@ -74,7 +74,7 @@ def build() -> None:
     st.html('<br>')
 
     with st.container(border=True):
-        col1, col2, col3 = st.columns([1, 1, 2], gap="medium")
+        col1, col2, col3 = st.columns((1, 1, 2), gap="medium")
         min_spot_price = col1.number_input(
             label="Min spot price",
             min_value=0.01,
