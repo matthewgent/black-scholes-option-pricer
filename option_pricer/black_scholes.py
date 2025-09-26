@@ -101,8 +101,6 @@ class Put(Option):
 
 class PricingModel:
     __days_per_year: int = 365
-    call: Call
-    put: Put
 
     def __init__(
             self, spot_price: float, strike_price: float,
@@ -124,12 +122,12 @@ class PricingModel:
         continuous_discounting_factor = math.exp(
             -risk_free_interest_rate * years_to_maturity)
 
-        self.call = Call(
+        self.call: Call = Call(
             spot_price, strike_price, years_to_maturity, volatility, d1_cdf,
             d2_cdf, d1_pdf, risk_free_interest_rate,
             continuous_discounting_factor)
 
-        self.put = Put(
+        self.put: Put = Put(
             spot_price, strike_price, years_to_maturity, volatility, d1_cdf,
             d2_cdf, d1_pdf, risk_free_interest_rate,
             continuous_discounting_factor)
