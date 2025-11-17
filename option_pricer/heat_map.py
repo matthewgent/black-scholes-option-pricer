@@ -41,7 +41,6 @@ def plot(
         y_volatilities: np.ndarray
 ) -> None:
     tick_values = np.arange(1, x_prices.size)
-    print(map_data.shape)
     heat_map = plotly.imshow(
         map_data,
         text_auto=True,
